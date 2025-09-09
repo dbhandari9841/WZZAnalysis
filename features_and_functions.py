@@ -281,17 +281,17 @@ def compute_best_z_candidate_pt(data, particle_type="mu", fill_value=-999.0):
         with_name="Momentum4D"
     )
 
-    # all unique lepton pairs
+    #all unique lepton pairs
     pairs = ak.combinations(particles, 2, fields=["a", "b"])
     z_cands = pairs["a"] + pairs["b"]   # full 4-vector of each Z candidate
     masses = z_cands.mass
 
-    # pick the one closest to 91.2 GeV
+    #pick the one closest to 91.2 GeV
     z_mass = 91.2
     mass_diff = abs(masses - z_mass)
     best_index = ak.argmin(mass_diff, axis=1)
 
-    # extract the pt of the best candidate
+    #extract the pt of the best candidate
     best_pt = ak.fill_none(
         ak.firsts(z_cands.pt[ak.local_index(z_cands.pt, axis=1) == best_index]),
         fill_value
@@ -310,7 +310,7 @@ def compute_delta_phi_Z_MET(data, particle_type="mu", fill_value=-999.0):
         with_name="Momentum4D"
     )
 
-    # all unique lepton pairs
+    #all unique lepton pairs
     pairs = ak.combinations(particles, 2, fields=["a", "b"])
     z_cands = pairs["a"] + pairs["b"]  # full 4-vector of each Z candidate
     masses = z_cands.mass
@@ -319,13 +319,13 @@ def compute_delta_phi_Z_MET(data, particle_type="mu", fill_value=-999.0):
     mass_diff = abs(masses - z_mass)
     best_index = ak.argmin(mass_diff, axis=1)
 
-    # extract φ of the best candidate
+    #extract phi of the best candidate
     best_phi = ak.firsts(z_cands.phi[ak.local_index(z_cands.phi, axis=1) == best_index])
 
-    # Replace missing φ with fill_value **before** Δφ calculation
+    #eplace missing phi with fill_value **before** delphi calculation
     best_phi = ak.fill_none(best_phi, fill_value)
 
-    # Δφ with MET
+    #delphi with MET
     phi_MET = data["MET_Phi"]
     dphi = np.arctan2(np.sin(best_phi - phi_MET), np.cos(best_phi - phi_MET))
 
@@ -336,7 +336,7 @@ def compute_delta_phi_Z_lep(data, particle_type="mu", fill_value=-999.0):
     import numpy as np
     import awkward as ak
 
-    # Build leptons
+    #first build leptons
     leptons = ak.zip(
         {
             "pt":  data[f"{particle_type}_pt"],
@@ -535,7 +535,7 @@ def compute_delta_eta_phi_3lep(events):
     deta23 = eta[:,1] - eta[:,2]
     deta31 = eta[:,2] - eta[:,0]
 
-    #del_phi(wrapped to [-π, π])
+    #del_phi(wrapped to [-pi, pi])
     dphi12 = np.arctan2(np.sin(phi[:,0] - phi[:,1]), np.cos(phi[:,0] - phi[:,1]))
     dphi23 = np.arctan2(np.sin(phi[:,1] - phi[:,2]), np.cos(phi[:,1] - phi[:,2]))
     dphi31 = np.arctan2(np.sin(phi[:,2] - phi[:,0]), np.cos(phi[:,2] - phi[:,0]))
@@ -572,17 +572,17 @@ def compute_deltaR_3lep(events):
     eta = leptons.eta
     phi = leptons.phi
 
-    # Δη
+    # deleta
     deta12 = eta[:,0] - eta[:,1]
     deta23 = eta[:,1] - eta[:,2]
     deta31 = eta[:,2] - eta[:,0]
 
-    # Δφ (wrapped)
+    #dphi (wrapped)
     dphi12 = np.arctan2(np.sin(phi[:,0] - phi[:,1]), np.cos(phi[:,0] - phi[:,1]))
     dphi23 = np.arctan2(np.sin(phi[:,1] - phi[:,2]), np.cos(phi[:,1] - phi[:,2]))
     dphi31 = np.arctan2(np.sin(phi[:,2] - phi[:,0]), np.cos(phi[:,2] - phi[:,0]))
 
-    # ΔR
+    #deltaR
     deltaR12 = np.sqrt(deta12**2 + dphi12**2)
     deltaR23 = np.sqrt(deta23**2 + dphi23**2)
     deltaR31 = np.sqrt(deta31**2 + dphi31**2)
@@ -644,7 +644,7 @@ def compute_event_shapes_exact(events):
     #computing |p|^2 for each lepton
     p2 = leptons.px**2 + leptons.py**2 + leptons.pz**2
 
-    # Sum of |p|^2 per event (denominator has been used for normalization)
+    #summing of |p|^2 per event (denominator has been used for normalization)
     norm = ak.sum(p2, axis=1)
 
     #then compute the components of the momentum tensor numerator per event
@@ -898,58 +898,54 @@ def compute_thrust(events, n_steps=100):
 
 
 def z_met_balance_features(data, particle_type="mu", fill_value=-999.0):
-    """
-    Returns dict with:
-      dphi_Z_MET, met_par_to_Z, met_perp_to_Z, met_over_pTZ, pTZ_minus_MET, recoil_Z_MET
-    """
     pt  = data[f"{particle_type}_pt"]
     eta = data[f"{particle_type}_eta"]
     phi = data[f"{particle_type}_phi"]
 
-    # Lepton 4-vectors (massless)
+    #massless lep 4-vectors (massless)
     leptons = ak.zip({"pt": pt, "eta": eta, "phi": phi, "mass": 0.0}, with_name="Momentum4D")
 
-    # All unique pairs => Z candidates
+    #all unique pairs -> Z candidates
     pairs = ak.combinations(leptons, 2, fields=["a", "b"])
     z_cands = pairs["a"] + pairs["b"]
     masses  = z_cands.mass
 
-    # Pick candidate closest to mZ
+    #picking th candidate closest to mZ
     z_mass = 91.2
     best_idx = ak.argmin(abs(masses - z_mass), axis=1)
 
-    # Best Z candidate per event (may be None if no pairs)
+    #besst Z candidate per event (may be None if no pairs)
     best_Z = ak.firsts(z_cands[ak.local_index(z_cands, axis=1) == best_idx])
 
-    # MET 4-vector (η=0, mass=0)
+    #MET 4-vector (eta=0, mass=0)
     metPT  = data["MET"]
     phiMET = data["MET_Phi"]
 
-    # Extract φ and pT for Z (keep None if missing)
+    #extract phi and pT for Z (keep None if missing)
     phi_Z  = ak.values_astype(best_Z.phi, float)
     pTZ    = ak.values_astype(best_Z.pt, float)
 
-    # Δφ in [-π, π]
+    #delphi in [-pi, pi]
     dphi = np.arctan2(np.sin(phi_Z - phiMET), np.cos(phi_Z - phiMET))
 
-    # Components of MET wrt Z
+    #components of MET wrt Z
     met_par  = metPT * np.cos(dphi)
     met_perp = metPT * np.sin(dphi)
 
-        # Ratios/differences (guard against divide-by-zero)
-    # Ratios/differences (guard against divide-by-zero)
+        #ratios/differences (guard against divide-by-zero)
+    #ratios/differences (guard against divide-by-zero)
     safe_div = metPT / pTZ
     met_over_pTZ = ak.where(pTZ > 0, safe_div, np.nan)
     pTZ_minus_MET = pTZ - metPT
 
 
 
-    # Vector recoil | pT(Z) + MET |
+    #vector recoil | pT(Z) + MET |
     px_Z, py_Z = pTZ * np.cos(phi_Z), pTZ * np.sin(phi_Z)
     px_MET, py_MET = metPT * np.cos(phiMET), metPT * np.sin(phiMET)
     recoil = np.sqrt((px_Z + px_MET)**2 + (py_Z + py_MET)**2)
 
-    # Replace None with fill_value and convert to numpy
+    #replace None with fill_value and convert to numpy
     out = {
         "dphi_Z_MET":     np.nan_to_num(ak.to_numpy(ak.fill_none(dphi, fill_value)), nan=fill_value, posinf=fill_value, neginf=fill_value),
         "met_par_to_Z":   np.nan_to_num(ak.to_numpy(ak.fill_none(met_par, fill_value)), nan=fill_value, posinf=fill_value, neginf=fill_value),
@@ -963,7 +959,7 @@ def z_met_balance_features(data, particle_type="mu", fill_value=-999.0):
 
 
 def mt_nonZ_lepton_MET(data, particle_type="mu", fill_value=-999.0):
-    # Collect leptons of given type
+    #first we collect leptons of given type
     pt  = data[f"{particle_type}_pt"]
     eta = data[f"{particle_type}_eta"]
     phi = data[f"{particle_type}_phi"]
@@ -973,25 +969,25 @@ def mt_nonZ_lepton_MET(data, particle_type="mu", fill_value=-999.0):
         with_name="Momentum4D"
     )
 
-    # Build all dilepton pairs
+    #then build dilep pairs
     pairs = ak.combinations(leptons, 2, fields=["a", "b"])
     z_cands = pairs["a"] + pairs["b"]
     masses  = z_cands.mass
 
-    # Pick the pair closest to mZ
+    #picking the the pair closest to mZ
     z_mass = 91.2
     best_idx = ak.argmin(abs(masses - z_mass), axis=1)
 
 
-        # Indices of leptons in the best-Z pair (per event)
+        #indices of leptons in the best-Z pair (per event)
     lep_idx = ak.local_index(leptons, axis=1)
     pair_idx = ak.combinations(lep_idx, 2, fields=["i", "j"])
 
-    # Extract i, j for the best-Z per event
+    #extract i, j for the best-Z per event
     best_i = ak.singletons(pair_idx["i"][best_idx])
     best_j = ak.singletons(pair_idx["j"][best_idx])
 
-    # Mask for leptons not in the best-Z pair
+    #masking for leptons not in the best-Z pair
     is_nonZ = (lep_idx != best_i) & (lep_idx != best_j)
     nonZ_lep = ak.firsts(leptons[is_nonZ])
 
@@ -1000,10 +996,10 @@ def mt_nonZ_lepton_MET(data, particle_type="mu", fill_value=-999.0):
     met_pt  = data["MET"]
     met_phi = data["MET_Phi"]
 
-    # Require ≥3 leptons
+    #requiring ≥3 leptons
     valid = ak.num(leptons) >= 3
 
-    # Compute transverse mass mT of leftover lepton with MET
+    #computing transverse mass mT of leftover lepton with MET
     mt = ak.where(
         valid & ~ak.is_none(nonZ_lep),
         np.sqrt(
@@ -1013,7 +1009,7 @@ def mt_nonZ_lepton_MET(data, particle_type="mu", fill_value=-999.0):
         None,
     )
 
-    # Return as flat numpy array with fill_value
+    #as with others, return as flat numpy array with fill_value
     return ak.to_numpy(ak.fill_none(mt, fill_value))
 
 
@@ -1372,7 +1368,7 @@ def compute_triplet_masses_4lep(events):
 
 
 def total_event_et_ge4lep(events):
-    # Count total leptons per event
+    #counting total leptons per event
     #n_lep = ak.num(events.el_pt, axis=1) + ak.num(events.mu_pt, axis=1)
 
     #apply mask: only keep events with ≥ 4 leptons
@@ -1482,7 +1478,7 @@ def compute_delta_eta_phi_4lep(events):
         }),
     ], axis=1)
 
-    # Pad to 4 lep
+    #we pad to 4 lep
     leptons = ak.pad_none(leptons, 4)[:, :4]
 
     #extract
@@ -1497,7 +1493,7 @@ def compute_delta_eta_phi_4lep(events):
     deta24 = eta[:, 1] - eta[:, 3]
     deta34 = eta[:, 2] - eta[:, 3]
 
-    #del_phi (wrapped into [-π, π])
+    #del_phi (wrapped into [-pi,pi])
     def delta_phi(phi1, phi2):
         return np.arctan2(np.sin(phi1 - phi2), np.cos(phi1 - phi2))
 
@@ -1540,10 +1536,10 @@ def compute_pt_4lepsys(events):
         }),
     ], axis=1)
 
-    # make Lorentz vectors
+    #make Lorentz vectors
     leptons = ak.Array(leptons, with_name="Momentum4D")
 
-    # keep exactly 4 leptons (pad if fewer, cut if more)
+    #keep exactly 4 leptons (pad if fewer, cut if more)
     leptons4 = ak.pad_none(leptons, 4)[:, :4]
 
     # sum 4-vectors, then get system pt
@@ -1568,13 +1564,13 @@ def compute_dphi_met_4lepsys(events):
         }),
     ], axis=1)
 
-    # make Lorentz vectors
+    #make Lorentz vectors
     leptons = ak.Array(leptons, with_name="Momentum4D")
 
-    # exactly 4 leptons (pad if fewer, cut if more)
+    #exactly 4 leptons (pad if fewer, cut if more), just to make sure
     leptons4 = ak.pad_none(leptons, 4)[:, :4]
 
-    # sum into a 4-lepton system
+    #sum into a 4-lepton system
     lep4sys = ak.sum(leptons4, axis=1)
 
     # build MET vector
@@ -1585,7 +1581,7 @@ def compute_dphi_met_4lepsys(events):
         "mass": ak.zeros_like(events.MET),
     }, with_name="Momentum4D")
 
-    # compute Δφ between system and MET
+    # delphi between system and MET
     dphi = (lep4sys.phi - met_vec.phi + np.pi) % (2 * np.pi) - np.pi
 
     return ak.to_numpy(dphi)
@@ -1594,7 +1590,7 @@ def compute_dphi_met_4lepsys(events):
 
 
 def compute_deltaR_4lep(events):
-    # Build leptons (electrons + muons)
+    #built leptons (electrons + muons)
     leptons = ak.concatenate([
         ak.zip({
             "pt": events.el_pt,
@@ -1610,13 +1606,13 @@ def compute_deltaR_4lep(events):
         }),
     ], axis=1)
 
-    # Pad to at least 4 leptons, truncate extras
+    #pad to at least 4 leptons, truncate extras
     leptons = ak.pad_none(leptons, 4)[:, :4]
 
     eta = leptons.eta
     phi = leptons.phi
 
-    # Compute all 6 ΔR combinations
+    #comp all 6 delR combinations
     deltaR = {}
     pairs = [(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)]
     for i, j in pairs:
@@ -1629,10 +1625,9 @@ def compute_deltaR_4lep(events):
 
 
 def compute_delta_phi_between_Zs(data, fill_value=-999.0):
-    """
-    Compute Δφ between the two best Z candidates from up to 4 leptons
-    (electrons + muons), ensuring the Zs do not share leptons.
-    """
+    
+    #Compute delphi between the two best Z candidates from up to 4 leptons
+    #(electrons + muons), ensuring the Zs do not share leptons.
     # Electrons
     electrons = ak.zip(
         {
@@ -1655,13 +1650,13 @@ def compute_delta_phi_between_Zs(data, fill_value=-999.0):
         with_name="Momentum4D",
     )
 
-    # Merge leptons
+    #merge leptons
     leptons = ak.concatenate([electrons, muons], axis=1)
 
-    # Require at least 4 leptons, take leading 4
+    #reeequire at least 4 leptons, take leading 4
     leptons = ak.pad_none(leptons, 4)
 
-    # Rebuild as Momentum4D to preserve vector behavior after slicing
+    #rebuild as Momentum4D (to preserve vector behavior after slicing)
     leptons4 = ak.zip(
         {
             "pt": leptons.pt[:, :4],
@@ -1672,7 +1667,7 @@ def compute_delta_phi_between_Zs(data, fill_value=-999.0):
         with_name="Momentum4D",
     )
 
-    # Possible unique disjoint pairings
+    # unique disjoint pairings
     pairings = [
         ((0, 1), (2, 3)),
         ((0, 2), (1, 3)),
@@ -1690,7 +1685,7 @@ def compute_delta_phi_between_Zs(data, fill_value=-999.0):
         m1 = z1.mass
         m2 = z2.mass
 
-        # Score: closeness of both masses to mZ
+        #score: closeness of both masses to mZ
         score = abs(m1 - z_mass) + abs(m2 - z_mass)
 
         if best_score is None:
@@ -1704,7 +1699,7 @@ def compute_delta_phi_between_Zs(data, fill_value=-999.0):
                 ak.where(mask, z2, best_pairing[1]),
             )
 
-    # Δφ between the two Z candidates
+    #delphi between the two Z candidates
     dphi = best_pairing[0].deltaphi(best_pairing[1])
     dphi = ak.fill_none(dphi, fill_value)
 
