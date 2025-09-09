@@ -1704,3 +1704,198 @@ def compute_delta_phi_between_Zs(data, fill_value=-999.0):
     dphi = ak.fill_none(dphi, fill_value)
 
     return ak.to_numpy(dphi)
+
+
+#######################################################################################################
+###############################5lep####################################################################
+
+def extract_features_5lep(events, label, max_leptons=5, max_jets=2):
+
+    def safe_get(arr, idx, default=-999):
+        padded = ak.pad_none(arr, idx + 1, axis=1)
+        extracted = padded[:, idx]
+        return ak.to_numpy(ak.fill_none(extracted, default))
+
+    def safe_get_jets(array, idx, max_items):
+        padded = ak.pad_none(array, max_items, axis=1)
+        extracted = padded[:, idx]
+        return ak.to_numpy(extracted, allow_missing=True)
+
+    lep_dvars = compute_delta_eta_phi_4lep(events)
+    lep_pairmass = compute_pairwise_masses_4lep(events)
+    lep_tripletmass = compute_triplet_masses_4lep(events)
+    deltaR_4lep = compute_deltaR_4lep(events)
+    #best_mass, actual_inv = compute_best_z_candidate_masses(events, particle_type="mu", z_window=10.0)
+    sph, apl = compute_event_shapes(events)
+    features = {
+        #leading leptons (electron and muon per index)
+        "el_pt_0": safe_get(events.el_pt, 0, -999),
+        "el_eta_0": safe_get(events.el_eta, 0, -999),
+        "el_phi_0": safe_get(events.el_phi, 0, -999),
+
+        "mu_pt_0": safe_get(events.mu_pt, 0, -999),
+        "mu_eta_0": safe_get(events.mu_eta, 0, -999),
+        "mu_phi_0": safe_get(events.mu_phi, 0, -999),
+
+        "el_pt_1": safe_get(events.el_pt, 1, -999),
+        "el_eta_1": safe_get(events.el_eta, 1, -999),
+        "el_phi_1": safe_get(events.el_phi, 1, -999),
+
+        "mu_pt_1": safe_get(events.mu_pt, 1, -999),
+        "mu_eta_1": safe_get(events.mu_eta, 1, -999),
+        "mu_phi_1": safe_get(events.mu_phi, 1, -999),
+
+        "el_pt_2": safe_get(events.el_pt, 2, -999),
+        "el_eta_2": safe_get(events.el_eta, 2, -999),
+        "el_phi_2": safe_get(events.el_phi, 2, -999),
+
+        "mu_pt_2": safe_get(events.mu_pt, 2, -999),
+        "mu_eta_2": safe_get(events.mu_eta, 2, -999),
+        "mu_phi_2": safe_get(events.mu_phi, 2, -999),
+
+        #4th lepton
+        "el_pt_3": safe_get(events.el_pt, 3, -999),
+        "el_eta_3": safe_get(events.el_eta, 3, -999),
+        "el_phi_3": safe_get(events.el_phi, 3, -999),
+
+        "mu_pt_3": safe_get(events.mu_pt, 3, -999),
+        "mu_eta_3": safe_get(events.mu_eta, 3, -999),
+        "mu_phi_3": safe_get(events.mu_phi, 3, -999),
+
+        #5th lepton
+        "el_pt_4": safe_get(events.el_pt, 3, -999),
+        "el_eta_4": safe_get(events.el_eta, 3, -999),
+        "el_phi_4": safe_get(events.el_phi, 3, -999),
+
+        "mu_pt_4": safe_get(events.mu_pt, 3, -999),
+        "mu_eta_4": safe_get(events.mu_eta, 3, -999),
+        "mu_phi_4": safe_get(events.mu_phi, 3, -999),
+
+        #jets
+        "jet_pt_0": safe_get_jets(events.jet_pt, 0, max_jets),
+        "jet_eta_0": safe_get_jets(events.jet_eta, 0, max_jets),
+        "jet_phi_0": safe_get_jets(events.jet_phi, 0, max_jets),
+
+        "jet_pt_1": safe_get_jets(events.jet_pt, 1, max_jets),
+        "jet_eta_1": safe_get_jets(events.jet_eta, 1, max_jets),
+        "jet_phi_1": safe_get_jets(events.jet_phi, 1, max_jets),
+        "jet_mass_0": safe_get_jets(events.jet_mass, 0, max_jets),
+        "jet_btag_0": safe_get_jets(events.jet_btag, 0, max_jets),
+
+        #other features
+        "MET": ak.to_numpy(events.MET, allow_missing=True),
+        "MET_Phi": ak.to_numpy(events.MET_Phi, allow_missing=True),
+
+        # 5-lepton invariant mass (useful for ZZ/H->ZZ)
+        #"m_5lep": compute_invariant_mass_4lep(events),
+        
+        #"total_event_et": total_event_et_ge4lep(events),
+
+        #"MT_lep_MET" : compute_mt_4l(events),
+
+        #"pt_5lepsys": compute_pt_4lepsys(events),
+        #"dphi_met_5lepsys": compute_dphi_met_4lepsys(events),
+
+        
+        #best Z candidates (pairing leptons closest to Z mass)
+        #"best_Z1_mass_mu": compute_best_z_candidate_masses_4lep(events, particle_type="mu", pair_index=0),
+        #"best_Z2_mass_mu": compute_best_z_candidate_masses_4lep(events, particle_type="mu", pair_index=1),
+        #"best_Z1_mass_el": compute_best_z_candidate_masses_4lep(events, particle_type="el", pair_index=0),
+        #"best_Z2_mass_el": compute_best_z_candidate_masses_4lep(events, particle_type="el", pair_index=1),
+
+        #"del_phi_bestZs": compute_delta_phi_between_Zs(events),
+
+        #dilepton invariant masses (all unique pairs)
+        #"m12": lep_pairmass["m12"],
+        #"m13": lep_pairmass["m13"],
+        #"m14": lep_pairmass["m14"],
+        #"m23": lep_pairmass["m23"],
+        #"m24": lep_pairmass["m24"],
+        #"m34": lep_pairmass["m34"],
+
+        #trilepton invariant masses (useful for WZ-like topologies)
+        #"m123": lep_tripletmass["m123"],
+        #"m124": lep_tripletmass["m124"],
+        #"m134": lep_tripletmass["m134"],
+        #"m234": lep_tripletmass["m234"],
+
+        #del_eta, del_phi between lepton pairs
+        #"deta12": lep_dvars["deta12"],
+        #"deta13": lep_dvars["deta13"],
+        #"deta14": lep_dvars["deta14"],
+        #"deta23": lep_dvars["deta23"],
+        #"deta24": lep_dvars["deta24"],
+        #"deta34": lep_dvars["deta34"],
+
+        #"dphi12": lep_dvars["dphi12"],
+        #"dphi13": lep_dvars["dphi13"],
+        #"dphi14": lep_dvars["dphi14"],
+        #"dphi23": lep_dvars["dphi23"],
+        #"dphi24": lep_dvars["dphi24"],
+        #"dphi34": lep_dvars["dphi34"],
+
+        
+       # "deltaR12": deltaR_4lep["deltaR12"],
+        #"deltaR13": deltaR_4lep["deltaR13"],
+        #"deltaR14": deltaR_4lep["deltaR14"],
+        #"deltaR23": deltaR_4lep["deltaR23"],
+        #"deltaR24": deltaR_4lep["deltaR24"],
+        #"deltaR34": deltaR_4lep["deltaR34"],
+
+            #event-shape variables
+        #"sphericity": sph,
+        #"aplanarity": apl,
+
+        # Transverse mass with MET (for leptons + MET signatures)
+        #"MT_lep_MET": compute_mt(events)    #not sure what the remaining lepton would be here...this variable might not besuper relevant
+}
+
+        #printing  some debug outputs for inspection
+   # print("m_5lep:", features["m_4lep"][:5])
+   # print("total_event_et:", features["total_event_et"][:5])
+    #print("MT_lep_MET:", features["MT_lep_MET"][:5])
+
+    #print("best_Z1_mass_mu:", features["best_Z1_mass_mu"][:5])
+    #print("best_Z2_mass_mu:", features["best_Z2_mass_mu"][:5])
+    #print("best_Z1_mass_el:", features["best_Z1_mass_el"][:5])
+    #print("best_Z2_mass_el:", features["best_Z2_mass_el"][:5])
+    
+
+    #print("m12:", ak.to_numpy(features["m12"], allow_missing=True)[:5])
+    #print("m13:", ak.to_numpy(features["m34"], allow_missing=True)[:5])
+    #print("m14:", ak.to_numpy(features["m12"], allow_missing=True)[:5])
+    #print("m23:", ak.to_numpy(features["m34"], allow_missing=True)[:5])
+    #print("m24:", ak.to_numpy(features["m12"], allow_missing=True)[:5])
+    #print("m34:", ak.to_numpy(features["m34"], allow_missing=True)[:5])
+    
+    #print("m123:", ak.to_numpy(features["m123"], allow_missing=True)[:5])
+    #print("m124:", ak.to_numpy(features["m123"], allow_missing=True)[:5])
+    #print("m134:", ak.to_numpy(features["m123"], allow_missing=True)[:5])
+    #print("m234:", ak.to_numpy(features["m234"], allow_missing=True)[:5])
+        
+    #print("deta12:", ak.to_numpy(features["deta12"], allow_missing=True)[:5])
+    #print("deta13:", ak.to_numpy(features["deta34"], allow_missing=True)[:5])
+    #print("deta14:", ak.to_numpy(features["dphi12"], allow_missing=True)[:5])
+    #print("deta23:", ak.to_numpy(features["dphi34"], allow_missing=True)[:5])    
+    #print("deta24:", ak.to_numpy(features["deta12"], allow_missing=True)[:5])
+    #print("deta34:", ak.to_numpy(features["deta34"], allow_missing=True)[:5])
+    #print("dphi12:", ak.to_numpy(features["dphi12"], allow_missing=True)[:5])
+    #print("dphi13:", ak.to_numpy(features["dphi34"], allow_missing=True)[:5])  
+    #print("dphi14:", ak.to_numpy(features["deta12"], allow_missing=True)[:5])
+    #print("dphi23:", ak.to_numpy(features["deta34"], allow_missing=True)[:5])
+    #print("dphi24:", ak.to_numpy(features["dphi12"], allow_missing=True)[:5])
+    #print("dphi34:", ak.to_numpy(features["dphi34"], allow_missing=True)[:5])  
+    
+    #print("sphericity:", features["sphericity"][:5])
+    #print("aplanarity:", features["aplanarity"][:5])
+
+    lengths = [len(arr) for arr in features.values()]
+    if len(set(lengths)) > 1:
+        raise ValueError(f"Inconsistent array lengths in the features: {set(lengths)}")
+
+    df = pd.DataFrame(features)
+    df["label"] = label
+    return df
+
+
+vector.register_awkward()
