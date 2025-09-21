@@ -1721,10 +1721,11 @@ def extract_features_5lep(events, label, max_leptons=5, max_jets=2):
         extracted = padded[:, idx]
         return ak.to_numpy(extracted, allow_missing=True)
 
-    lep_dvars = compute_delta_eta_phi_4lep(events)
-    lep_pairmass = compute_pairwise_masses_4lep(events)
-    lep_tripletmass = compute_triplet_masses_4lep(events)
-    deltaR_4lep = compute_deltaR_4lep(events)
+    lep_dvars_five = compute_delta_eta_phi_5lep(events)
+    lep_pairmass_five = compute_pairwise_masses_5lep(events)
+    lep_tripletmass_five = compute_triplet_masses_5lep(events)
+    lep_fourmass_five = compute_4lep_masses_5lep(events)
+    deltaR_5lep = compute_deltaR_5lep(events)
     #best_mass, actual_inv = compute_best_z_candidate_masses(events, particle_type="mu", z_window=10.0)
     sph, apl = compute_event_shapes(events)
     features = {
@@ -1787,14 +1788,14 @@ def extract_features_5lep(events, label, max_leptons=5, max_jets=2):
         "MET_Phi": ak.to_numpy(events.MET_Phi, allow_missing=True),
 
         # 5-lepton invariant mass (useful for ZZ/H->ZZ)
-        #"m_5lep": compute_invariant_mass_4lep(events),
+        "m_5lep": compute_invariant_mass_5lep(events),
         
-        #"total_event_et": total_event_et_ge4lep(events),
+        "total_event_et": total_event_et_ge5lep(events),
 
-        #"MT_lep_MET" : compute_mt_4l(events),
+        #"MT_lep_MET" : compute_mt_5l(events),
 
-        #"pt_5lepsys": compute_pt_4lepsys(events),
-        #"dphi_met_5lepsys": compute_dphi_met_4lepsys(events),
+        "pt_5lepsys": compute_pt_5lepsys(events),
+        "dphi_met_5lepsys": compute_dphi_met_5lepsys(events),
 
         
         #best Z candidates (pairing leptons closest to Z mass)
@@ -1806,41 +1807,70 @@ def extract_features_5lep(events, label, max_leptons=5, max_jets=2):
         #"del_phi_bestZs": compute_delta_phi_between_Zs(events),
 
         #dilepton invariant masses (all unique pairs)
-        #"m12": lep_pairmass["m12"],
-        #"m13": lep_pairmass["m13"],
-        #"m14": lep_pairmass["m14"],
-        #"m23": lep_pairmass["m23"],
-        #"m24": lep_pairmass["m24"],
-        #"m34": lep_pairmass["m34"],
+        "m12": lep_pairmass_five["m12"],
+        "m13": lep_pairmass_five["m13"],
+        "m14": lep_pairmass_five["m14"],
+        "m15": lep_pairmass_five["m15"],
+        "m23": lep_pairmass_five["m23"],
+        "m24": lep_pairmass_five["m24"],
+        "m25": lep_pairmass_five["m25"],
+        "m34": lep_pairmass_five["m34"],
+        "m35": lep_pairmass_five["m35"],
+        "m45": lep_pairmass_five["m45"],
 
         #trilepton invariant masses (useful for WZ-like topologies)
-        #"m123": lep_tripletmass["m123"],
-        #"m124": lep_tripletmass["m124"],
-        #"m134": lep_tripletmass["m134"],
-        #"m234": lep_tripletmass["m234"],
+        "m123": lep_tripletmass_five["m123"],
+        "m124": lep_tripletmass_five["m124"],
+        "m125": lep_tripletmass_five["m125"],
+        "m134": lep_tripletmass_five["m134"],
+        "m135": lep_tripletmass_five["m135"],
+        "m145": lep_tripletmass_five["m145"],
+        "m234": lep_tripletmass_five["m234"],
+        "m235": lep_tripletmass_five["m235"],
+        "m245": lep_tripletmass_five["m245"],
+        "m345": lep_tripletmass_five["m345"],
+
+        #four-lepton invariant mass
+        
+        "m1234": lep_fourmass_five["m1234"],
+        "m1235": lep_fourmass_five["m1235"],
+        "m1245": lep_fourmass_five["m1245"],
+        "m1345": lep_fourmass_five["m1345"],
+        "m2345": lep_fourmass_five["m2345"],
 
         #del_eta, del_phi between lepton pairs
-        #"deta12": lep_dvars["deta12"],
-        #"deta13": lep_dvars["deta13"],
-        #"deta14": lep_dvars["deta14"],
-        #"deta23": lep_dvars["deta23"],
-        #"deta24": lep_dvars["deta24"],
-        #"deta34": lep_dvars["deta34"],
-
-        #"dphi12": lep_dvars["dphi12"],
-        #"dphi13": lep_dvars["dphi13"],
-        #"dphi14": lep_dvars["dphi14"],
-        #"dphi23": lep_dvars["dphi23"],
-        #"dphi24": lep_dvars["dphi24"],
-        #"dphi34": lep_dvars["dphi34"],
-
+        "deta12": lep_dvars_five["deta12"],
+        "deta13": lep_dvars_five["deta13"],
+        "deta14": lep_dvars_five["deta14"],
+        "deta15": lep_dvars_five["deta15"],
+        "deta23": lep_dvars_five["deta23"],
+        "deta24": lep_dvars_five["deta24"],
+        "deta25": lep_dvars_five["deta25"],
+        "deta34": lep_dvars_five["deta34"],
+        "deta35": lep_dvars_five["deta35"],
+        "deta45": lep_dvars_five["deta45"],
         
-       # "deltaR12": deltaR_4lep["deltaR12"],
-        #"deltaR13": deltaR_4lep["deltaR13"],
-        #"deltaR14": deltaR_4lep["deltaR14"],
-        #"deltaR23": deltaR_4lep["deltaR23"],
-        #"deltaR24": deltaR_4lep["deltaR24"],
-        #"deltaR34": deltaR_4lep["deltaR34"],
+        "dphi12": lep_dvars_five["dphi12"],
+        "dphi13": lep_dvars_five["dphi13"],
+        "dphi14": lep_dvars_five["dphi14"],
+        "dphi15": lep_dvars_five["dphi15"],
+        "dphi23": lep_dvars_five["dphi23"],
+        "dphi24": lep_dvars_five["dphi24"],
+        "dphi25": lep_dvars_five["dphi25"],
+        "dphi34": lep_dvars_five["dphi34"],
+        "dphi35": lep_dvars_five["dphi35"],
+        "dphi45": lep_dvars_five["dphi45"],
+        
+        "deltaR12": deltaR_5lep["deltaR12"],
+        "deltaR13": deltaR_5lep["deltaR13"],
+        "deltaR14": deltaR_5lep["deltaR14"],
+        "deltaR15": deltaR_5lep["deltaR14"],
+        "deltaR23": deltaR_5lep["deltaR23"],
+        "deltaR24": deltaR_5lep["deltaR24"],
+        "deltaR25": deltaR_5lep["deltaR25"],
+        "deltaR34": deltaR_5lep["deltaR34"],
+        "deltaR35": deltaR_5lep["deltaR35"],
+        "deltaR45": deltaR_5lep["deltaR45"],
 
             #event-shape variables
         #"sphericity": sph,
@@ -1899,3 +1929,444 @@ def extract_features_5lep(events, label, max_leptons=5, max_jets=2):
 
 
 vector.register_awkward()
+
+def compute_invariant_mass_5lep(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt),  #massless approx
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt),  # muons massless approx
+        }),
+    ], axis=1)
+
+    #turning into Lorentz vecs
+    leptons = ak.Array(leptons, with_name="Momentum4D")
+
+    #ensuring at least 5 leptons per event (pad with None if fewer)
+    leptons = ak.pad_none(leptons, 5)
+
+    #taking the first 5 leptons
+    leptons5 = leptons[:, :5]
+
+    #invariant mass of the 5-lepton system
+    m5lep = ak.sum(leptons5, axis=1).mass
+
+    return ak.to_numpy(m5lep)
+
+
+def total_event_et_ge5lep(events):
+    #count total leptons per event
+    n_lep = ak.num(events.el_pt, axis=1) + ak.num(events.mu_pt, axis=1)
+
+    #apply mask: only keep events with ≥ 5 leptons
+    mask = n_lep >= 5
+    events_sel = events[mask]
+
+    # electrons
+    total_el_pt = ak.sum(events_sel.el_pt, axis=1)
+    # muons
+    total_mu_pt = ak.sum(events_sel.mu_pt, axis=1)
+    # jets
+    total_jet_pt = ak.sum(events_sel.jet_pt, axis=1)
+    # missing ET
+    total_met = events_sel.MET
+
+    # scalar sum
+    total_et = total_el_pt + total_mu_pt + total_jet_pt + total_met
+
+    return ak.to_numpy(total_et, allow_missing=True)
+
+
+
+
+def compute_mt_5l(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": 0.000511  # electron mass
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": 0.10566  # muon mass
+        })
+    ], axis=1)
+
+    #requiring at least 5 leptons per event
+    n_lep = ak.num(events.el_pt, axis=1) + ak.num(events.mu_pt, axis=1)
+    mask_ge5 = n_lep >= 5
+    leptons = leptons[mask_ge5]
+    events = events[mask_ge5]
+
+    #all lep pairs
+    lep_pairs = ak.combinations(leptons, 2, fields=["lep1", "lep2"])
+
+    # invariant mass helper
+    def inv_mass(lep1, lep2):
+        return np.sqrt(
+            (lep1.mass + lep2.mass) ** 2 +
+            2 * lep1.pt * lep2.pt *
+            (np.cosh(lep1.eta - lep2.eta) - np.cos(lep1.phi - lep2.phi))
+        )
+
+    masses = inv_mass(lep_pairs["lep1"], lep_pairs["lep2"])
+
+    #best Z candidate
+    z_mass = 91.1876
+    best_pair_idx = ak.argmin(np.abs(masses - z_mass), axis=1)
+    best_pairs = lep_pairs[best_pair_idx]
+
+    lep1 = ak.firsts(best_pairs.lep1)
+    lep2 = ak.firsts(best_pairs.lep2)
+
+    #mask to exclude Z leptons
+    mask = ~(
+        ((leptons.pt == lep1.pt) &
+         (leptons.eta == lep1.eta) &
+         (leptons.phi == lep1.phi)) |
+        ((leptons.pt == lep2.pt) &
+         (leptons.eta == lep2.eta) &
+         (leptons.phi == lep2.phi))
+    )
+
+    leftover_leptons = leptons[mask]
+
+    #pick the highest-pT leftover lepton (from the >=3 non-Z leptons in 5-lepton events)
+    leftover_leptons = ak.firsts(leftover_leptons[ak.argsort(leftover_leptons.pt, ascending=False)])
+
+    #transverse mass with MET
+    lep_pt = leftover_leptons.pt
+    lep_phi = leftover_leptons.phi
+    met_pt = events.MET
+    met_phi = events.MET_Phi
+
+    delta_phi = lep_phi - met_phi
+    mt = np.sqrt(2 * lep_pt * met_pt * (1 - np.cos(delta_phi)))
+
+    return ak.to_numpy(mt)
+
+
+
+def compute_pt_5lepsys(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt),
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt),
+        }),
+    ], axis=1)
+
+    #make Lorentz vectors
+    leptons = ak.Array(leptons, with_name="Momentum4D")
+
+    # keep exactly 5 leptons (pad if fewer, cut if more)
+    leptons5 = ak.pad_none(leptons, 5)[:, :5]
+
+    # sum 4-vectors, then get system pt
+    lep5vec = ak.sum(leptons5, axis=1)
+    return ak.to_numpy(lep5vec.pt)
+
+
+
+def compute_dphi_met_5lepsys(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt),
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt),
+        }),
+    ], axis=1)
+
+    # make Lorentz vectors
+    leptons = ak.Array(leptons, with_name="Momentum4D")
+
+    # keep exactly 5 leptons (pad if fewer, cut if more)
+    leptons5 = ak.pad_none(leptons, 5)[:, :5]
+
+    # sum into a 5-lepton system
+    lep5sys = ak.sum(leptons5, axis=1)
+
+    # build MET vector
+    met_vec = ak.zip({
+        "pt": events.MET,
+        "phi": events.MET_Phi,
+        "eta": ak.zeros_like(events.MET),
+        "mass": ak.zeros_like(events.MET),
+    }, with_name="Momentum4D")
+
+    # delta phi between system and MET
+    dphi = (lep5sys.phi - met_vec.phi + np.pi) % (2 * np.pi) - np.pi
+
+    return ak.to_numpy(dphi)
+
+
+
+def compute_pairwise_masses_5lep(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,    # building lepton collection (electrons + muons)
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt)
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt)
+        }),
+    ], axis=1)
+
+    #tag as Lorentz vectors
+    leptons = ak.with_name(leptons, "Momentum4D")
+
+    #padd/cut to exactly 5 leptons
+    leptons = ak.pad_none(leptons, 5)[:, :5]
+
+    #there are 10 unique pairwise invariant masses
+    m12 = (leptons[:, 0] + leptons[:, 1]).mass
+    m13 = (leptons[:, 0] + leptons[:, 2]).mass
+    m14 = (leptons[:, 0] + leptons[:, 3]).mass
+    m15 = (leptons[:, 0] + leptons[:, 4]).mass
+    m23 = (leptons[:, 1] + leptons[:, 2]).mass
+    m24 = (leptons[:, 1] + leptons[:, 3]).mass
+    m25 = (leptons[:, 1] + leptons[:, 4]).mass
+    m34 = (leptons[:, 2] + leptons[:, 3]).mass
+    m35 = (leptons[:, 2] + leptons[:, 4]).mass
+    m45 = (leptons[:, 3] + leptons[:, 4]).mass
+
+    return {
+        "m12": ak.to_numpy(m12),
+        "m13": ak.to_numpy(m13),
+        "m14": ak.to_numpy(m14),
+        "m15": ak.to_numpy(m15),
+        "m23": ak.to_numpy(m23),
+        "m24": ak.to_numpy(m24),
+        "m25": ak.to_numpy(m25),
+        "m34": ak.to_numpy(m34),
+        "m35": ak.to_numpy(m35),
+        "m45": ak.to_numpy(m45),
+    }
+
+
+
+def compute_triplet_masses_5lep(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,     # make lepton collection (electrons + muons)
+            "mass": ak.zeros_like(events.el_pt)
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt)
+        }),
+    ], axis=1)
+
+    #tag as Lorentz vectors
+    leptons = ak.with_name(leptons, "Momentum4D")
+
+    #pad/cut to exactly 5 leptons
+    leptons = ak.pad_none(leptons, 5)[:, :5]
+
+    #there are 10 unique triplet invariant masses
+    m123 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 2]).mass
+    m124 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 3]).mass
+    m125 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 4]).mass
+    m134 = (leptons[:, 0] + leptons[:, 2] + leptons[:, 3]).mass
+    m135 = (leptons[:, 0] + leptons[:, 2] + leptons[:, 4]).mass
+    m145 = (leptons[:, 0] + leptons[:, 3] + leptons[:, 4]).mass
+    m234 = (leptons[:, 1] + leptons[:, 2] + leptons[:, 3]).mass
+    m235 = (leptons[:, 1] + leptons[:, 2] + leptons[:, 4]).mass
+    m245 = (leptons[:, 1] + leptons[:, 3] + leptons[:, 4]).mass
+    m345 = (leptons[:, 2] + leptons[:, 3] + leptons[:, 4]).mass
+
+    return {
+        "m123": ak.to_numpy(m123),
+        "m124": ak.to_numpy(m124),
+        "m125": ak.to_numpy(m125),
+        "m134": ak.to_numpy(m134),
+        "m135": ak.to_numpy(m135),
+        "m145": ak.to_numpy(m145),
+        "m234": ak.to_numpy(m234),
+        "m235": ak.to_numpy(m235),
+        "m245": ak.to_numpy(m245),
+        "m345": ak.to_numpy(m345),
+    }
+
+def compute_4lep_masses_5lep(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,     # make lepton collection (electrons + muons)
+            "mass": ak.zeros_like(events.el_pt)
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt)
+        }),
+    ], axis=1)
+
+    # tag as Lorentz vectors
+    leptons = ak.with_name(leptons, "Momentum4D")
+
+    # pad/cut to exactly 5 leptons
+    leptons = ak.pad_none(leptons, 5)[:, :5]
+
+    # 5 unique 4-lepton invariant masses
+    m1234 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 2] + leptons[:, 3]).mass
+    m1235 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 2] + leptons[:, 4]).mass
+    m1245 = (leptons[:, 0] + leptons[:, 1] + leptons[:, 3] + leptons[:, 4]).mass
+    m1345 = (leptons[:, 0] + leptons[:, 2] + leptons[:, 3] + leptons[:, 4]).mass
+    m2345 = (leptons[:, 1] + leptons[:, 2] + leptons[:, 3] + leptons[:, 4]).mass
+
+    return {
+        "m1234": ak.to_numpy(m1234),
+        "m1235": ak.to_numpy(m1235),
+        "m1245": ak.to_numpy(m1245),
+        "m1345": ak.to_numpy(m1345),
+        "m2345": ak.to_numpy(m2345),
+    }
+
+
+def compute_delta_eta_phi_5lep(events):
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt),
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt),
+        }),
+    ], axis=1)
+
+    # pad/cut to 5 leptons
+    leptons = ak.pad_none(leptons, 5)[:, :5]
+
+    # extract
+    eta = leptons.eta
+    phi = leptons.phi
+
+    # delta eta
+    deta12 = eta[:, 0] - eta[:, 1]
+    deta13 = eta[:, 0] - eta[:, 2]
+    deta14 = eta[:, 0] - eta[:, 3]
+    deta15 = eta[:, 0] - eta[:, 4]
+    deta23 = eta[:, 1] - eta[:, 2]
+    deta24 = eta[:, 1] - eta[:, 3]
+    deta25 = eta[:, 1] - eta[:, 4]
+    deta34 = eta[:, 2] - eta[:, 3]
+    deta35 = eta[:, 2] - eta[:, 4]
+    deta45 = eta[:, 3] - eta[:, 4]
+
+    # delta phi (wrapped into [-pi, pi])
+    def delta_phi(phi1, phi2):
+        return np.arctan2(np.sin(phi1 - phi2), np.cos(phi1 - phi2))
+
+    dphi12 = delta_phi(phi[:, 0], phi[:, 1])
+    dphi13 = delta_phi(phi[:, 0], phi[:, 2])
+    dphi14 = delta_phi(phi[:, 0], phi[:, 3])
+    dphi15 = delta_phi(phi[:, 0], phi[:, 4])
+    dphi23 = delta_phi(phi[:, 1], phi[:, 2])
+    dphi24 = delta_phi(phi[:, 1], phi[:, 3])
+    dphi25 = delta_phi(phi[:, 1], phi[:, 4])
+    dphi34 = delta_phi(phi[:, 2], phi[:, 3])
+    dphi35 = delta_phi(phi[:, 2], phi[:, 4])
+    dphi45 = delta_phi(phi[:, 3], phi[:, 4])
+
+    return {
+        "deta12": ak.to_numpy(deta12),
+        "deta13": ak.to_numpy(deta13),
+        "deta14": ak.to_numpy(deta14),
+        "deta15": ak.to_numpy(deta15),
+        "deta23": ak.to_numpy(deta23),
+        "deta24": ak.to_numpy(deta24),
+        "deta25": ak.to_numpy(deta25),
+        "deta34": ak.to_numpy(deta34),
+        "deta35": ak.to_numpy(deta35),
+        "deta45": ak.to_numpy(deta45),
+        "dphi12": ak.to_numpy(dphi12),
+        "dphi13": ak.to_numpy(dphi13),
+        "dphi14": ak.to_numpy(dphi14),
+        "dphi15": ak.to_numpy(dphi15),
+        "dphi23": ak.to_numpy(dphi23),
+        "dphi24": ak.to_numpy(dphi24),
+        "dphi25": ak.to_numpy(dphi25),
+        "dphi34": ak.to_numpy(dphi34),
+        "dphi35": ak.to_numpy(dphi35),
+        "dphi45": ak.to_numpy(dphi45),
+    }
+
+
+
+def compute_deltaR_5lep(events):
+    # build leptons (electrons + muons)
+    leptons = ak.concatenate([
+        ak.zip({
+            "pt": events.el_pt,
+            "eta": events.el_eta,
+            "phi": events.el_phi,
+            "mass": ak.zeros_like(events.el_pt)
+        }),
+        ak.zip({
+            "pt": events.mu_pt,
+            "eta": events.mu_eta,
+            "phi": events.mu_phi,
+            "mass": ak.zeros_like(events.mu_pt)
+        }),
+    ], axis=1)
+
+    # pad to at least 5 leptons, truncate extras
+    leptons = ak.pad_none(leptons, 5)[:, :5]
+
+    eta = leptons.eta
+    phi = leptons.phi
+
+    # computing all 10 unique deltaR combinations
+    deltaR = {}
+    pairs = [(0,1), (0,2), (0,3), (0,4),
+             (1,2), (1,3), (1,4),
+             (2,3), (2,4),
+             (3,4)]
+    
+    for i, j in pairs:
+        deta = eta[:, i] - eta[:, j]
+        dphi = np.arctan2(np.sin(phi[:, i] - phi[:, j]), np.cos(phi[:, i] - phi[:, j]))
+        deltaR[f"deltaR{i+1}{j+1}"] = ak.to_numpy(np.sqrt(deta**2 + dphi**2))
+
+    return deltaR
